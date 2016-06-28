@@ -6,7 +6,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class Client implements Runnable {
 
@@ -25,30 +24,38 @@ public class Client implements Runnable {
 	private void initialize() {
 		try {
 			socket = new Socket(hostName, portNumber);
+			System.out.println("Connection accepted by server " + socket);
 
 			out = new DataOutputStream(socket.getOutputStream());
 			in = new DataInputStream(socket.getInputStream());
+			new Thread(this).start();
 
-		} catch (UnknownHostException e) {
+		} catch (Exception e) {
+			System.err.println("Initialization Exception on port : " + portNumber);
 			e.printStackTrace();
-		} catch (IOException e) {
-			
-			e.printStackTrace();
+			System.exit(-1);
 		}
 
-		new Thread(this).start();
 	}
 
 	public static void main(String[] args) throws IOException {
 
+		String portNumber;
+
+		if (args.length == 0) {
+			portNumber = "9090";// default port
+		} else {
+			portNumber = args[0];
+		}
+
 		String hostName = "localhost";
-		int portNumber = Integer.parseInt("4444");
-		Client client = new Client(hostName, portNumber);
+
+		Client client = new Client(hostName, Integer.valueOf(portNumber));
 		client.getInput();
 
 	}
 
-	public void getInput() {
+	public void getInput() throws IOException {
 		try {
 
 			BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
@@ -56,14 +63,11 @@ public class Client implements Runnable {
 			String userInput;
 			while ((userInput = stdIn.readLine()) != null) {
 				out.writeUTF(userInput);
-//				System.out.println("echo: " + in.readUTF());
 			}
-		} catch (UnknownHostException e) {
-			System.err.println("Don't know about host " + hostName);
-			System.exit(1);
-		} catch (IOException e) {
-			System.err.println("Couldn't get I/O for the connection to " + hostName);
-			System.exit(1);
+		} catch (IOException ioe) {
+			System.err.println("unable to read from standard input ");
+			ioe.printStackTrace();
+			throw ioe;
 		}
 	}
 
@@ -72,13 +76,19 @@ public class Client implements Runnable {
 			String message;
 			try {
 				message = in.readUTF();
-				System.out.println(message);
+				printMessageToTerminal(message);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				System.err.println("unable to read from standard input ");
 				e.printStackTrace();
 			}
-
 		}
+	}
 
+	private void printMessageToTerminal(String message) {
+		if (message == null || "".equals(message.trim())) {
+			System.out.println("INFO :: _INVALID_MESSAGE_");
+			return;
+		}
+		System.out.println(message);
 	}
 }
