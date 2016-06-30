@@ -11,3 +11,4 @@ Commands :
   1. to get the identity of the client : {"type":"ME"}
   2. to get others who are online : {"type":"OTHERS"}
   3. to relay messages to other clients : {"type":"RELAY","message":"hi","to":"2,3"}
+  4. to signout : {"type":"SIGNOUT"}
