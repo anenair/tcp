@@ -1,0 +1,18 @@
+package message;
+
+option java_package = "com.unity.message";
+option java_outer_classname = "MessageDelivery";
+
+message Message {
+  required MessageType messageType = 1;
+  optional string message = 2;
+  optional string to = 3;
+  optional string from = 4;
+
+  enum MessageType {
+    ME = 0;
+    OTHERS = 1;
+    RELAY = 2;
+    SIGNOUT = 3;
+  }
+}
